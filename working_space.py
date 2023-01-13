@@ -19,6 +19,8 @@ import shapely.affinity
 
 
 def create_workingspace(
+    primaries_rotate=[1.75, -0.5, -1.0],
+    primaries_scale=[0.15, 0.15, 0.10],
     colourspace_in=colour.RGB_COLOURSPACES["ITU-R BT.709"],
 ):
     #####
@@ -44,9 +46,9 @@ def create_workingspace(
 
     # Rotate the primaries to gently nudge the distortions toward the Tritan
     # confusion axis through achromatic. Positive values are counter clockwise.
-    rotate_red = 1.75
-    rotate_green = -0.5
-    rotate_blue = -1.0
+    rotate_red = primaries_rotate[0]
+    rotate_green = primaries_rotate[1]
+    rotate_blue = primaries_rotate[2]
 
     rotated_out_red = shapely.affinity.rotate(
         scaled_red, rotate_red, origin=point_achromatic
@@ -78,9 +80,9 @@ def create_workingspace(
             [intersection.coords.xy[0][0], intersection.coords.xy[1][0]]
         )
 
-    scale_red_in = 0.15
-    scale_green_in = 0.15
-    scale_blue_in = 0.10
+    scale_red_in = primaries_scale[0]
+    scale_green_in = primaries_scale[0]
+    scale_blue_in = primaries_scale[0]
 
     hull_red = shapely.geometry.Point(hull_rotated_points[0])
     hull_green = shapely.geometry.Point(hull_rotated_points[1])

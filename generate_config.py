@@ -81,6 +81,13 @@ if __name__ == "__main__":
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
+    # Rotation and scale of the individual working space primaries. Rotate is
+    # in degrees, where negative is clockwise, and positive is counterclockwise.
+    # Scale is in percentage relative to the primary chromaticity purity, where
+    # 0.0 represents no inset scale.
+    default_rotate = [1.75, -0.5, -1.0]
+    default_scale = [0.15, 0.15, 0.10]
+
     argparser.add_argument(
         "-et",
         "--exponent_toe",
@@ -130,6 +137,23 @@ if __name__ == "__main__":
         type=float,
         default=normalized_log2_maximum,
     )
+    argparser.add_argument(
+        "-pi",
+        "--primaries_inset",
+        help="Percentage of scaling inset for the primaries",
+        type=float,
+        nargs=3,
+        default=default_scale,
+    )
+    argparser.add_argument(
+        "-pr",
+        "--primaries_rotate",
+        help="Rotational adjustment in degrees for each of the RGB primaries, "
+        "positive counterclockwise, negative clockwise",
+        type=float,
+        nargs=3,
+        default=default_rotate,
+    )
 
     args = argparser.parse_args()
 
@@ -169,7 +193,12 @@ if __name__ == "__main__":
     transform_list = [
         PyOpenColorIO.RangeTransform(minInValue=0.0, minOutValue=0.0),
         PyOpenColorIO.MatrixTransform(
-            AgX.shape_OCIO_matrix(AgX.AgX_compressed_matrix())
+            AgX.shape_OCIO_matrix(
+                AgX.AgX_compressed_matrix(
+                    primaries_rotate=args.primaries_rotate,
+                    primaries_scale=args.primaries_inset,
+                )
+            )
         ),
         PyOpenColorIO.AllocationTransform(
             allocation=PyOpenColorIO.Allocation.ALLOCATION_LG2,
@@ -398,55 +427,6 @@ if __name__ == "__main__":
     # Curve Setup
     #####
 
-    # argparser.add_argument(
-    #     "-et",
-    #     "--exponent_toe",
-    #     help="Set toe curve rate of change as an exponential power, hello Sean Cooper",
-    #     type=float,
-    #     default=exponent[0],
-    # )
-    # argparser.add_argument(
-    #     "-ps",
-    #     "--exponent_shoulder",
-    #     help="Set shoulder curve rate of change as an exponential power",
-    #     type=float,
-    #     default=exponent[1],
-    # )
-    # argparser.add_argument(
-    #     "-fs",
-    #     "--fulcrum_slope",
-    #     help="Set central section rate of change as rise over run slope",
-    #     type=float,
-    #     default=slope,
-    # )
-    # argparser.add_argument(
-    #     "-fi",
-    #     "--fulcrum_input",
-    #     help="Input fulcrum point relative to the normalized log2 range",
-    #     type=float,
-    #     default=x_pivot,
-    # )
-    # argparser.add_argument(
-    #     "-fo",
-    #     "--fulcrum_output",
-    #     help="Output fulcrum point relative to the normalized log2 range",
-    #     type=float,
-    #     default=y_pivot,
-    # )
-    # argparser.add_argument(
-    #     "-ll",
-    #     "--limit_low",
-    #     help="Lowest value of the normalized log2 range",
-    #     type=float,
-    #     default=normalized_log2_minimum,
-    # )
-    # argparser.add_argument(
-    #     "-lh",
-    #     "--limit_high",
-    #     help="Highest value of the normalized log2 range",
-    #     type=float,
-    #     default=normalized_log2_maximum,
-    # )
     x_input = numpy.linspace(0.0, 1.0, 4096)
 
     y_LUT = sigmoid.equation_full_curve(

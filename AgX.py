@@ -27,9 +27,13 @@ def shape_OCIO_matrix(numpy_matrix):
     return ocio_matrix
 
 
-def AgX_compressed_matrix(compression=0.20):
+def AgX_compressed_matrix(
+    primaries_rotate=[1.75, -0.5, -1.0], primaries_scale=[0.15, 0.15, 0.10]
+):
     colourspace_BT709 = colour.RGB_COLOURSPACES["ITU-R BT.709"]
-    colourspace_sb2383 = working_space.create_workingspace()
+    colourspace_sb2383 = working_space.create_workingspace(
+        primaries_rotate=primaries_rotate, primaries_scale=primaries_scale
+    )
 
     return colour.matrix_RGB_to_RGB(colourspace_sb2383, colourspace_BT709)
 
