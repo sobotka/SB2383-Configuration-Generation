@@ -13,6 +13,7 @@ __status__ = Test
 """
 
 import PyOpenColorIO
+import argparse
 import numpy
 import colour
 import pathlib
@@ -39,15 +40,102 @@ supported_displays = {
     },
 }
 
-AgX_min_log2 = -10.0
-AgX_max_log2 = +6.5
-AgX_x_pivot = numpy.abs(AgX_min_log2 / (AgX_max_log2 - AgX_min_log2))
-AgX_y_pivot = 0.50
-
 if __name__ == "__main__":
+    #####
+    # Parameters
+    #####
+
+    # Aesthetic choices for the data. Stronger shaped curves with greater slope
+    # will shred the values more rapidly. If higher contrast is desired, it is
+    # wiser to head into the image state with a softer shaped curve to derive
+    # the signal, then apply contrast to the post formed image signal using a
+    # pivoted contrast approach.
+    #
+    # Some folks call this "dynamic range", which is arguably nonsense. This is the
+    # range of values of the origin colourimetry, before it is transformed into the
+    # picture.
+    normalized_log2_minimum = -10.0
+    normalized_log2_maximum = +6.5
+
+    # The input pivot point of the interstitial encoding. That is, the first stage
+    # is to take the input data to a normalized log2 encoding, which creates a new
+    # set of colourimetric ratios. This position is classically considered the
+    # "middle" range of the soon-to-be picture / image. Here it is simply set to
+    # be the "exposure" zero point of the incoming signal.
+    x_pivot = numpy.abs(normalized_log2_minimum) / (
+        normalized_log2_maximum - normalized_log2_minimum
+    )
+
+    # The output, or ordinate, value of the transformation. We use a simple bog
+    # standard display encoding value as our final "middle" perceptual anchor.
+    # Maximization of the signal to the quantised expression range should be
+    # considered.
+    y_pivot = 0.18 ** (1.0 / 2.2)
+
+    # Power represents the tension in the toe and shoulder of the log encoding,
+    # with the slope indicating the general slope of the linear segment.
+    exponent = [1.5, 1.5]
+    slope = 2.4
+    argparser = argparse.ArgumentParser(
+        description="Generates an OpenColorIO configuration",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    argparser.add_argument(
+        "-et",
+        "--exponent_toe",
+        help="Set toe curve rate of change as an exponential power, hello Sean Cooper",
+        type=float,
+        default=exponent[0],
+    )
+    argparser.add_argument(
+        "-ps",
+        "--exponent_shoulder",
+        help="Set shoulder curve rate of change as an exponential power",
+        type=float,
+        default=exponent[1],
+    )
+    argparser.add_argument(
+        "-fs",
+        "--fulcrum_slope",
+        help="Set central section rate of change as rise over run slope",
+        type=float,
+        default=slope,
+    )
+    argparser.add_argument(
+        "-fi",
+        "--fulcrum_input",
+        help="Input fulcrum point relative to the normalized log2 range",
+        type=float,
+        default=x_pivot,
+    )
+    argparser.add_argument(
+        "-fo",
+        "--fulcrum_output",
+        help="Output fulcrum point relative to the normalized log2 range",
+        type=float,
+        default=y_pivot,
+    )
+    argparser.add_argument(
+        "-ll",
+        "--limit_low",
+        help="Lowest value of the normalized log2 range",
+        type=float,
+        default=normalized_log2_minimum,
+    )
+    argparser.add_argument(
+        "-lh",
+        "--limit_high",
+        help="Highest value of the normalized log2 range",
+        type=float,
+        default=normalized_log2_maximum,
+    )
+
+    args = argparser.parse_args()
+
     config = PyOpenColorIO.Config()
     description = (
-        "A dangerous picutre formation chain designed for Eduardo Suazo and "
+        "A dangerous picture formation chain designed for Eduardo Suazo and "
         "Chris Brejon."
     )
     config.setDescription(description)
@@ -86,8 +174,8 @@ if __name__ == "__main__":
         PyOpenColorIO.AllocationTransform(
             allocation=PyOpenColorIO.Allocation.ALLOCATION_LG2,
             vars=[
-                AgX.calculate_OCIO_log2(AgX_min_log2),
-                AgX.calculate_OCIO_log2(AgX_max_log2),
+                AgX.calculate_OCIO_log2(args.limit_low),
+                AgX.calculate_OCIO_log2(args.limit_high),
             ],
         ),
     ]
@@ -310,27 +398,63 @@ if __name__ == "__main__":
     # Curve Setup
     #####
 
-    # Aesthetic choices for the curve. Stronger shaped curves with greater slope
-    # will shred the values more rapidly. If higher contrast is desired, it is
-    # wiser to head into the image state with a softer shaped curve to derive
-    # the signal, then apply contrast to the post formed image signal using a
-    # pivoted contrast approach.
-    #
-    # Power represents the tension in the toe and shoulder of the log encoding,
-    # with the slope indicating the general slope of the linear segment.
-    power = [1.5, 1.5]
-    slope = 2.4
-
+    # argparser.add_argument(
+    #     "-et",
+    #     "--exponent_toe",
+    #     help="Set toe curve rate of change as an exponential power, hello Sean Cooper",
+    #     type=float,
+    #     default=exponent[0],
+    # )
+    # argparser.add_argument(
+    #     "-ps",
+    #     "--exponent_shoulder",
+    #     help="Set shoulder curve rate of change as an exponential power",
+    #     type=float,
+    #     default=exponent[1],
+    # )
+    # argparser.add_argument(
+    #     "-fs",
+    #     "--fulcrum_slope",
+    #     help="Set central section rate of change as rise over run slope",
+    #     type=float,
+    #     default=slope,
+    # )
+    # argparser.add_argument(
+    #     "-fi",
+    #     "--fulcrum_input",
+    #     help="Input fulcrum point relative to the normalized log2 range",
+    #     type=float,
+    #     default=x_pivot,
+    # )
+    # argparser.add_argument(
+    #     "-fo",
+    #     "--fulcrum_output",
+    #     help="Output fulcrum point relative to the normalized log2 range",
+    #     type=float,
+    #     default=y_pivot,
+    # )
+    # argparser.add_argument(
+    #     "-ll",
+    #     "--limit_low",
+    #     help="Lowest value of the normalized log2 range",
+    #     type=float,
+    #     default=normalized_log2_minimum,
+    # )
+    # argparser.add_argument(
+    #     "-lh",
+    #     "--limit_high",
+    #     help="Highest value of the normalized log2 range",
+    #     type=float,
+    #     default=normalized_log2_maximum,
+    # )
     x_input = numpy.linspace(0.0, 1.0, 4096)
-    normalized_log2_minimum = AgX_min_log2
-    normalized_log2_maximum = AgX_max_log2
-    x_pivot = numpy.abs(normalized_log2_minimum) / (
-        normalized_log2_maximum - normalized_log2_minimum
-    )
-    y_pivot = 0.18 ** (1.0 / 2.2)
 
     y_LUT = sigmoid.equation_full_curve(
-        x_input, x_pivot, y_pivot, slope, power
+        x_input,
+        args.fulcrum_input,
+        args.fulcrum_output,
+        args.fulcrum_slope,
+        [args.exponent_toe, args.exponent_shoulder],
     )
 
     aesthetic_LUT_name = "AgX Default Contrast"
@@ -377,7 +501,6 @@ if __name__ == "__main__":
     all_displays = {}
     all_views = {}
 
-    print(displays.items())
     for display, views in displays.items():
         # all_displays.add(display)
         for view, transform in views.items():

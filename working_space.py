@@ -15,7 +15,7 @@ __status__ = Test
 import colour
 import numpy
 import shapely
-from shapely import affinity
+import shapely.affinity
 
 
 def create_workingspace(
@@ -30,8 +30,6 @@ def create_workingspace(
     point_blue = shapely.Point(colourspace_in.primaries[2])
     point_achromatic = shapely.Point(colourspace_in.whitepoint)
 
-    print(point_red, point_green, point_blue)
-
     # Scale the primaries outward by some safe and arbitrary amount.
     scaled_red = shapely.affinity.scale(
         point_red, xfact=2.0, yfact=2.0, origin=point_achromatic
@@ -43,8 +41,6 @@ def create_workingspace(
     scaled_blue = shapely.affinity.scale(
         point_blue, xfact=2.0, yfact=2.0, origin=point_achromatic
     )
-
-    print(scaled_red, scaled_green, scaled_blue)
 
     # Rotate the primaries to gently nudge the distortions toward the Tritan
     # confusion axis through achromatic. Positive values are counter clockwise.
@@ -121,8 +117,6 @@ def create_workingspace(
         ]
     )
 
-    print(primaries_inset, primaries_inset.shape)
-
     colourspace_sb2383 = colour.RGB_Colourspace(
         name="SouzaBrejon2383 Inset",
         primaries=primaries_inset,
@@ -134,5 +128,4 @@ def create_workingspace(
         use_derived_matrix_XYZ_to_RGB=True,
     )
 
-    print(colourspace_sb2383)
     return colourspace_sb2383
