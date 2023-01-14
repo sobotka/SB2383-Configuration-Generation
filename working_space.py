@@ -81,8 +81,8 @@ def create_workingspace(
         )
 
     scale_red_in = primaries_scale[0]
-    scale_green_in = primaries_scale[0]
-    scale_blue_in = primaries_scale[0]
+    scale_green_in = primaries_scale[1]
+    scale_blue_in = primaries_scale[2]
 
     hull_red = shapely.geometry.Point(hull_rotated_points[0])
     hull_green = shapely.geometry.Point(hull_rotated_points[1])
