@@ -114,8 +114,8 @@ def create_workingspace(
     primaries_inset = numpy.asarray(
         [
             rotated_inset_red.coords,
-            rotated_inset_green.coords[:],
-            rotated_inset_blue.coords[:],
+            rotated_inset_green.coords,
+            rotated_inset_blue.coords,
         ]
     )
 
