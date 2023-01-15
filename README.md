@@ -37,7 +37,7 @@ Set central section rate of change as rise over run slope (default: 2.4)
 #### **Description**
 This controls the slope at the fulcrum region of the curve. Higher values make the rate of change in terms of rise over run more agressive.
 
-#### **Visual Impact***
+#### **Visual Impact**
 Influences rate of change on chroma, and hue flight.
 
 ### **-fi FULCRUM_INPUT, --fulcrum_input FULCRUM_INPUT**
@@ -46,7 +46,7 @@ Input fulcrum point relative to the normalized log2 range (default: 0.6060606060
 #### **Description**
 The input value relative to the interstitial log2 encoding range. Given an achromatic sweep of values, input "middle grey".
 
-#### **Visual Impact***
+#### **Visual Impact**
 Influences value mapped to "middle grey" in relation to the output value.
 
 ### **-fo FULCRUM_OUTPUT, --fulcrum_output FULCRUM_OUTPUT**
@@ -55,7 +55,7 @@ Output fulcrum point relative to the normalized log2 range (default: 0.458656446
 #### **Description**
 The output value relative to the interstitial log2 encoding range. Given an achromatic sweep of values, output "middle grey".
 
-#### **Visual Impact***
+#### **Visual Impact**
 Influences value mapped to "middle grey" in relation to the input value.
 
 ### **-ll LIMIT_LOW, --limit_low LIMIT_LOW**
@@ -64,7 +64,7 @@ Lowest value of the normalized log2 range (default: -10.0)
 #### **Description**
 Given a range of open domain tristimulus values, the lowest ratio value accepted, expressed in normalized log2.
 
-#### **Visual Impact***
+#### **Visual Impact**
 In relation to the upper boundary value, determines the total ratio magnitude. Larger overall ranges increase density and may result in over-compression, and possibly posterization relative to the quantisation range of the output medium. Too large ranges may also yield an "uncanny" picture.
 
 ### **-lh LIMIT_HIGH, --limit_high LIMIT_HIGH**
@@ -73,7 +73,7 @@ Highest value of the normalized log2 range (default: 6.5)
 #### **Description**
 Given a range of open domain tristimulus values, the highest ratio value accepted, expressed in normalized log2.
 
-#### **Visual Impact***
+#### **Visual Impact**
 In relation to the lower boundary value, determines the total ratio magnitude. Larger overall ranges increase density and may result in over-compression, and possibly posterization relative to the quantisation range of the output medium. Too large ranges may also yield an "uncanny" picture.
 
 ### **-pi PRIMARIES_INSET PRIMARIES_INSET PRIMARIES_INSET, --primaries_inset PRIMARIES_INSET PRIMARIES_INSET PRIMARIES_INSET**
@@ -82,7 +82,7 @@ Percentage of scaling inset for the primaries (default: [0.15, 0.15, 0.1])
 #### **Description**
 Three values that dictate how much each "primary" is inset relative to the specified working space.
 
-#### **Visual Impact***
+#### **Visual Impact**
 Primarily influences the chromatic attenuation / amplification. Higher values toward one will yield more rapid attenuation of chroma, while lower values will relax, potentially to the point of posterization and picture breakup.
 
 ### **-pr PRIMARIES_ROTATE PRIMARIES_ROTATE PRIMARIES_ROTATE, --primaries_rotate PRIMARIES_ROTATE PRIMARIES_ROTATE PRIMARIES_ROTATE**
@@ -91,5 +91,5 @@ Rotational adjustment in degrees for each of the RGB primaries, positive counter
 #### **Description**
 Three values that dictate how much each "primary" is rotated in relation to the resulting working space.
 
-#### **Visual Impact***
+#### **Visual Impact**
 Primarily influences the flight of hue toward compliments, and the rate at which the hues traverse.
