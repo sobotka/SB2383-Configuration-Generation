@@ -85,8 +85,8 @@ if __name__ == "__main__":
     # in degrees, where negative is clockwise, and positive is counterclockwise.
     # Scale is in percentage relative to the primary chromaticity purity, where
     # 0.0 represents no inset scale.
-    default_rotate = [1.75, -0.5, -1.0]
-    default_scale = [0.15, 0.15, 0.10]
+    default_rotate = [4.5, -0.5, -2.0]
+    default_scale = [0.15, 0.10, 0.10]
 
     argparser.add_argument(
         "-et",
@@ -429,12 +429,11 @@ if __name__ == "__main__":
 
     x_input = numpy.linspace(0.0, 1.0, 4096)
 
-    y_LUT = sigmoid.equation_full_curve(
+    y_LUT = sigmoid.calculate_sigmoid(
         x_input,
-        args.fulcrum_input,
-        args.fulcrum_output,
-        args.fulcrum_slope,
-        [args.exponent_toe, args.exponent_shoulder],
+        pivots=[args.fulcrum_input, args.fulcrum_output],
+        slope=args.fulcrum_slope,
+        powers=[args.exponent_toe, args.exponent_shoulder],
     )
 
     aesthetic_LUT_name = "AgX Default Contrast"
