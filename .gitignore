@@ -3,3 +3,5 @@ __py*
 config/
 Pipfile
 Pipfile.lock
+*.code-workspace
+.gitignore

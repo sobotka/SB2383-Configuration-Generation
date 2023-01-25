@@ -96,7 +96,7 @@ if __name__ == "__main__":
         default=exponent[0],
     )
     argparser.add_argument(
-        "-ps",
+        "-es",
         "--exponent_shoulder",
         help="Set shoulder curve rate of change as an exponential power",
         type=float,
