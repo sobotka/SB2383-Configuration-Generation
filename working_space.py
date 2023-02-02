@@ -32,20 +32,20 @@ def create_workingspace(
     point_blue = shapely.Point(colourspace_in.primaries[2])
     point_achromatic = shapely.Point(colourspace_in.whitepoint)
 
-    # Scale the primaries outward by some safe and arbitrary amount.
+    # Scale the primaries outward by some safe and arbitrary amount to
+    # cover the totality of  the target geometry.
     scaled_red = shapely.affinity.scale(
-        point_red, xfact=2.0, yfact=2.0, origin=point_achromatic
+        point_red, xfact=2.0, yfact=4.0, origin=point_achromatic
     )
     scaled_green = shapely.affinity.scale(
-        point_green, xfact=2.0, yfact=2.0, origin=point_achromatic
+        point_green, xfact=2.0, yfact=4.0, origin=point_achromatic
     )
 
     scaled_blue = shapely.affinity.scale(
-        point_blue, xfact=2.0, yfact=2.0, origin=point_achromatic
+        point_blue, xfact=2.0, yfact=4.0, origin=point_achromatic
     )
 
-    # Rotate the primaries to gently nudge the distortions toward the Tritan
-    # confusion axis through achromatic. Positive values are counter clockwise.
+    # Rotate the primaries. Positive values are counter clockwise.
     rotate_red = primaries_rotate[0]
     rotate_green = primaries_rotate[1]
     rotate_blue = primaries_rotate[2]

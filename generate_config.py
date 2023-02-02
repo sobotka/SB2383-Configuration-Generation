@@ -484,7 +484,11 @@ if __name__ == "__main__":
         # all_displays.add(display)
         for view, transform in views.items():
             all_displays.update({display: {view: transform}})
-            print("Adding {} {} {}".format(display, view, transform))
+            print(
+                "Adding Display: {}, View: {}, Transform: {}".format(
+                    display, view, transform
+                )
+            )
             config.addDisplayView(
                 display=display, view=view, colorSpaceName=transform
             )
