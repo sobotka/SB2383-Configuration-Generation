@@ -93,3 +93,24 @@ Three values that dictate how much each "primary" is rotated in relation to the 
 
 #### **Visual Impact**
 Primarily influences the flight of hue toward compliments, and the rate at which the hues traverse.
+
+### **-ao ACHROMATIC_OUTSET, --achromatic_outset ACHROMATIC_OUTSET**
+Adjusts the achromatic centroid for all R=G=B tristimulus values as a decimal percentage. (default: 0.00)
+#### **Description**
+The amount to shift the white point toward the bisection line of the hull and the desired angle.
+#### **Visual Impact**
+Applies a general tint to the achromatic axis flight toward white. Also impacts the rate of change and flight of all hues.
+
+### **-ar ACHROMATIC_ROTATE, --achromatic_rotate ACHROMATIC_ROTATE**
+Adjusts the rotational angle of the achromatic centroid white point. Zero degrees is due north on the CIE chromaticity diagram. Positive values will rotate counterclockwise, negative values clockwise. (default: 0.0)
+#### **Description**
+The amount to rotate, in degrees, about the achromatic centroid toward the hull. The result shifts the achromatic centroid to the new position.
+#### **Visual Impact**
+Controls the general hue of the achromatic centroid on its flight toward white, moving the hue to the achromatic position selected in conjunction with the achromatic outset value. Also impacts the rate of change and flight of all hues.
+
+### **-aa ACHROMATIC_ADAPTATION, --achromatic_adaptation ACHROMATIC_ADAPTATION**
+Whether to re-align the achromatic centroid or leave the tristimulus values as-is. (default: True)
+#### **Description**
+Will leave the achromatic centroid off axis when used in conjunction with the achromatic rotate and achromatic outset above.
+#### **Visual Impact**
+Will create an imbalance in the achromatic centroid, leaving a tinted result in achromatic values for the flight to white. Will also result in invalid output domain values, yielding clip distortions.

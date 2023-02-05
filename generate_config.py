@@ -171,8 +171,21 @@ if __name__ == "__main__":
         type=float,
         default=default_achromatic_rotate,
     )
+    argparser.add_argument(
+        "-aa",
+        "--achromatic_adaptation",
+        help="Whether or not to perform chromatic adaptation in the restore "
+        "direction of the matrix transform",
+        type=bool,
+        default=True,
+    )
 
     args = argparser.parse_args()
+
+    if args.achromatic_adaptation:
+        adaptation = "CAT02"
+    else:
+        adaptation = None
 
     config = PyOpenColorIO.Config()
     description = (
@@ -196,15 +209,6 @@ if __name__ == "__main__":
     # Colourspaces
     ####
 
-    AgX_modified_matrix = AgX.shape_OCIO_matrix(
-        AgX.AgX_compressed_matrix(
-            primaries_rotate=args.primaries_rotate,
-            primaries_scale=args.primaries_inset,
-            achromatic_rotate=args.achromatic_rotate,
-            achromatic_outset=args.achromatic_outset,
-        )
-    )
-
     # Define a generic tristimulus linear working space, with assumed
     # BT.709 primaries and a D65 achromatic point.
     config, colourspace = AgX.add_colourspace(
@@ -218,7 +222,17 @@ if __name__ == "__main__":
     # AgX
     transform_list = [
         PyOpenColorIO.RangeTransform(minInValue=0.0, minOutValue=0.0),
-        PyOpenColorIO.MatrixTransform(AgX_modified_matrix),
+        PyOpenColorIO.MatrixTransform(
+            AgX.shape_OCIO_matrix(
+                AgX.AgX_compressed_matrix(
+                    primaries_rotate=args.primaries_rotate,
+                    primaries_scale=args.primaries_inset,
+                    achromatic_rotate=args.achromatic_rotate,
+                    achromatic_outset=args.achromatic_outset,
+                    adaptation=None,
+                )
+            )
+        ),
         PyOpenColorIO.AllocationTransform(
             allocation=PyOpenColorIO.Allocation.ALLOCATION_LG2,
             vars=[
@@ -360,7 +374,15 @@ if __name__ == "__main__":
             direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD,
         ),
         PyOpenColorIO.MatrixTransform(
-            AgX_modified_matrix,
+            AgX.shape_OCIO_matrix(
+                AgX.AgX_compressed_matrix(
+                    primaries_rotate=args.primaries_rotate,
+                    primaries_scale=args.primaries_inset,
+                    achromatic_rotate=args.achromatic_rotate,
+                    achromatic_outset=args.achromatic_outset,
+                    adaptation=adaptation,
+                )
+            ),
             direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_INVERSE,
         ),
         PyOpenColorIO.ExponentTransform(
