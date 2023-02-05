@@ -28,14 +28,24 @@ def shape_OCIO_matrix(numpy_matrix):
 
 
 def AgX_compressed_matrix(
-    primaries_rotate=[1.75, -0.5, -1.0], primaries_scale=[0.15, 0.15, 0.10]
+    primaries_rotate=[1.75, -0.5, -1.0],
+    primaries_scale=[0.15, 0.15, 0.10],
+    achromatic_rotate=0.0,
+    achromatic_outset=0.0,
 ):
     colourspace_BT709 = colour.RGB_COLOURSPACES["ITU-R BT.709"]
     colourspace_sb2383 = working_space.create_workingspace(
-        primaries_rotate=primaries_rotate, primaries_scale=primaries_scale
+        primaries_rotate=primaries_rotate,
+        primaries_scale=primaries_scale,
+        achromatic_rotate=achromatic_rotate,
+        achromatic_outset=achromatic_outset,
     )
 
-    return colour.matrix_RGB_to_RGB(colourspace_sb2383, colourspace_BT709)
+    return colour.matrix_RGB_to_RGB(
+        colourspace_sb2383,
+        colourspace_BT709,
+        chromatic_adaptation_transform=None,
+    )
 
 
 def as_numeric(obj, as_type=numpy.float64):

@@ -87,6 +87,8 @@ if __name__ == "__main__":
     # 0.0 represents no inset scale.
     default_rotate = [4.5, -0.5, -2.0]
     default_scale = [0.15, 0.10, 0.10]
+    default_achromatic_rotate = 0.0
+    default_achromatic_scale = 0.0
 
     argparser.add_argument(
         "-et",
@@ -154,6 +156,21 @@ if __name__ == "__main__":
         nargs=3,
         default=default_rotate,
     )
+    argparser.add_argument(
+        "-ao",
+        "--achromatic_outset",
+        help="Percentage of scaling outset for the achromatic coordinate",
+        type=float,
+        default=default_achromatic_scale,
+    )
+    argparser.add_argument(
+        "-ar",
+        "--achromatic_rotate",
+        help="Rotational adjustment in degrees for the achromatic coordinate, "
+        "positive counterclockwise, negative clockwise",
+        type=float,
+        default=default_achromatic_rotate,
+    )
 
     args = argparser.parse_args()
 
@@ -179,6 +196,15 @@ if __name__ == "__main__":
     # Colourspaces
     ####
 
+    AgX_modified_matrix = AgX.shape_OCIO_matrix(
+        AgX.AgX_compressed_matrix(
+            primaries_rotate=args.primaries_rotate,
+            primaries_scale=args.primaries_inset,
+            achromatic_rotate=args.achromatic_rotate,
+            achromatic_outset=args.achromatic_outset,
+        )
+    )
+
     # Define a generic tristimulus linear working space, with assumed
     # BT.709 primaries and a D65 achromatic point.
     config, colourspace = AgX.add_colourspace(
@@ -192,14 +218,7 @@ if __name__ == "__main__":
     # AgX
     transform_list = [
         PyOpenColorIO.RangeTransform(minInValue=0.0, minOutValue=0.0),
-        PyOpenColorIO.MatrixTransform(
-            AgX.shape_OCIO_matrix(
-                AgX.AgX_compressed_matrix(
-                    primaries_rotate=args.primaries_rotate,
-                    primaries_scale=args.primaries_inset,
-                )
-            )
-        ),
+        PyOpenColorIO.MatrixTransform(AgX_modified_matrix),
         PyOpenColorIO.AllocationTransform(
             allocation=PyOpenColorIO.Allocation.ALLOCATION_LG2,
             vars=[
@@ -341,7 +360,7 @@ if __name__ == "__main__":
             direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD,
         ),
         PyOpenColorIO.MatrixTransform(
-            AgX.shape_OCIO_matrix(AgX.AgX_compressed_matrix()),
+            AgX_modified_matrix,
             direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_INVERSE,
         ),
         PyOpenColorIO.ExponentTransform(
