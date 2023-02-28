@@ -54,28 +54,28 @@ if __name__ == "__main__":
     # Some folks call this "dynamic range", which is arguably nonsense. This is the
     # range of values of the origin colourimetry, before it is transformed into the
     # picture.
-    normalized_log2_minimum = -10.0
-    normalized_log2_maximum = +6.5
+    default_normalized_log2_minimum = -10.0
+    default_normalized_log2_maximum = +6.5
 
     # The input pivot point of the interstitial encoding. That is, the first stage
     # is to take the input data to a normalized log2 encoding, which creates a new
     # set of colourimetric ratios. This position is classically considered the
     # "middle" range of the soon-to-be picture / image. Here it is simply set to
     # be the "exposure" zero point of the incoming signal.
-    x_pivot = numpy.abs(normalized_log2_minimum) / (
-        normalized_log2_maximum - normalized_log2_minimum
+    default_x_pivot = numpy.abs(default_normalized_log2_minimum) / (
+        default_normalized_log2_maximum - default_normalized_log2_minimum
     )
 
     # The output, or ordinate, value of the transformation. We use a simple bog
     # standard display encoding value as our final "middle" perceptual anchor.
     # Maximization of the signal to the quantised expression range should be
     # considered.
-    y_pivot = 0.18 ** (1.0 / 2.2)
+    default_y_pivot = 0.18 ** (1.0 / 2.2)
 
     # Power represents the tension in the toe and shoulder of the log encoding,
     # with the slope indicating the general slope of the linear segment.
-    exponent = [1.5, 1.5]
-    slope = 2.4
+    default_exponent = [1.5, 1.5]
+    default_slope = 2.4
     argparser = argparse.ArgumentParser(
         description="Generates an OpenColorIO configuration",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -86,58 +86,59 @@ if __name__ == "__main__":
     # Scale is in percentage relative to the primary chromaticity purity, where
     # 0.0 represents no inset scale.
     default_rotate = [4.5, -0.5, -2.0]
-    default_scale = [0.15, 0.10, 0.10]
+    default_inset = [0.15, 0.10, 0.10]
+    default_outset = default_inset
     default_achromatic_rotate = 0.0
-    default_achromatic_scale = 0.0
+    default_achromatic_outset = 0.0
 
     argparser.add_argument(
         "-et",
         "--exponent_toe",
         help="Set toe curve rate of change as an exponential power, hello Sean Cooper",
         type=float,
-        default=exponent[0],
+        default=default_exponent[0],
     )
     argparser.add_argument(
         "-es",
         "--exponent_shoulder",
         help="Set shoulder curve rate of change as an exponential power",
         type=float,
-        default=exponent[1],
+        default=default_exponent[1],
     )
     argparser.add_argument(
         "-fs",
         "--fulcrum_slope",
         help="Set central section rate of change as rise over run slope",
         type=float,
-        default=slope,
+        default=default_slope,
     )
     argparser.add_argument(
         "-fi",
         "--fulcrum_input",
         help="Input fulcrum point relative to the normalized log2 range",
         type=float,
-        default=x_pivot,
+        default=default_x_pivot,
     )
     argparser.add_argument(
         "-fo",
         "--fulcrum_output",
         help="Output fulcrum point relative to the normalized log2 range",
         type=float,
-        default=y_pivot,
+        default=default_y_pivot,
     )
     argparser.add_argument(
         "-ll",
         "--limit_low",
         help="Lowest value of the normalized log2 range",
         type=float,
-        default=normalized_log2_minimum,
+        default=default_normalized_log2_minimum,
     )
     argparser.add_argument(
         "-lh",
         "--limit_high",
         help="Highest value of the normalized log2 range",
         type=float,
-        default=normalized_log2_maximum,
+        default=default_normalized_log2_maximum,
     )
     argparser.add_argument(
         "-pi",
@@ -145,7 +146,17 @@ if __name__ == "__main__":
         help="Percentage of scaling inset for the primaries",
         type=float,
         nargs=3,
-        default=default_scale,
+        default=default_inset,
+    )
+    argparser.add_argument(
+        "-po",
+        "--primaries_outset",
+        help="Percentage of scaling outset for the primaries return trip, where "
+        "negative values will push the returned primaries inward, resulting in "
+        "lower chroma for the primary in question",
+        type=float,
+        nargs=3,
+        default=default_outset,
     )
     argparser.add_argument(
         "-pr",
@@ -161,7 +172,7 @@ if __name__ == "__main__":
         "--achromatic_outset",
         help="Percentage of scaling outset for the achromatic coordinate",
         type=float,
-        default=default_achromatic_scale,
+        default=default_achromatic_outset,
     )
     argparser.add_argument(
         "-ar",
@@ -227,20 +238,31 @@ if __name__ == "__main__":
     )
 
     # AgX
+    working_space = AgX.shape_OCIO_matrix(
+        AgX.AgX_compressed_matrix(
+            primaries_rotate=args.primaries_rotate,
+            primaries_scale=args.primaries_inset,
+            achromatic_rotate=args.achromatic_rotate,
+            achromatic_outset=args.achromatic_outset,
+            adaptation=None,
+            show_plot=args.verbose_plotting,
+        )
+    )
+
+    output_space = AgX.shape_OCIO_matrix(
+        AgX.AgX_compressed_matrix(
+            primaries_rotate=args.primaries_rotate,
+            primaries_scale=args.primaries_outset,
+            achromatic_rotate=args.achromatic_rotate,
+            achromatic_outset=args.achromatic_outset,
+            adaptation=adaptation,
+            show_plot=args.verbose_plotting,
+        )
+    )
+
     transform_list = [
         PyOpenColorIO.RangeTransform(minInValue=0.0, minOutValue=0.0),
-        PyOpenColorIO.MatrixTransform(
-            AgX.shape_OCIO_matrix(
-                AgX.AgX_compressed_matrix(
-                    primaries_rotate=args.primaries_rotate,
-                    primaries_scale=args.primaries_inset,
-                    achromatic_rotate=args.achromatic_rotate,
-                    achromatic_outset=args.achromatic_outset,
-                    adaptation=None,
-                    show_plot=args.verbose_plotting,
-                )
-            )
-        ),
+        PyOpenColorIO.MatrixTransform(working_space),
         PyOpenColorIO.AllocationTransform(
             allocation=PyOpenColorIO.Allocation.ALLOCATION_LG2,
             vars=[
@@ -382,16 +404,7 @@ if __name__ == "__main__":
             direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD,
         ),
         PyOpenColorIO.MatrixTransform(
-            AgX.shape_OCIO_matrix(
-                AgX.AgX_compressed_matrix(
-                    primaries_rotate=args.primaries_rotate,
-                    primaries_scale=args.primaries_inset,
-                    achromatic_rotate=args.achromatic_rotate,
-                    achromatic_outset=args.achromatic_outset,
-                    adaptation=adaptation,
-                    show_plot=args.verbose_plotting,
-                )
-            ),
+            output_space,
             direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_INVERSE,
         ),
         PyOpenColorIO.ExponentTransform(
