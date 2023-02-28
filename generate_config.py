@@ -179,6 +179,13 @@ if __name__ == "__main__":
         type=bool,
         default=True,
     )
+    argparser.add_argument(
+        "-vp",
+        "--verbose_plotting",
+        help="Whether to create MatPlotLib plots of the transforms",
+        type=bool,
+        default=False,
+    )
 
     args = argparser.parse_args()
 
@@ -230,6 +237,7 @@ if __name__ == "__main__":
                     achromatic_rotate=args.achromatic_rotate,
                     achromatic_outset=args.achromatic_outset,
                     adaptation=None,
+                    show_plot=args.verbose_plotting,
                 )
             )
         ),
@@ -381,6 +389,7 @@ if __name__ == "__main__":
                     achromatic_rotate=args.achromatic_rotate,
                     achromatic_outset=args.achromatic_outset,
                     adaptation=adaptation,
+                    show_plot=args.verbose_plotting,
                 )
             ),
             direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_INVERSE,

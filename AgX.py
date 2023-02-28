@@ -33,6 +33,7 @@ def AgX_compressed_matrix(
     achromatic_rotate=0.0,
     achromatic_outset=0.0,
     adaptation="CAT02",
+    show_plot=False,
 ):
     colourspace_BT709 = colour.RGB_COLOURSPACES["ITU-R BT.709"]
     colourspace_sb2383 = working_space.create_workingspace(
@@ -40,6 +41,7 @@ def AgX_compressed_matrix(
         primaries_scale=primaries_scale,
         achromatic_rotate=achromatic_rotate,
         achromatic_outset=achromatic_outset,
+        show_plot=show_plot,
     )
 
     return colour.matrix_RGB_to_RGB(
