@@ -258,14 +258,14 @@ if __name__ == "__main__":
     matrix_destination = AgX.shape_OCIO_matrix(
         colour.matrix_RGB_to_RGB(
             colourspace_destination,
-            colourspace_working,
+            colourspace_source,
             chromatic_adaptation_transform=None,
         )
     )
 
     if args.verbose_plotting is True:
         colour.plotting.plot_RGB_colourspaces_in_chromaticity_diagram_CIE1931(
-            [colourspace_working, colourspace_destination]
+            [colourspace_working, colourspace_destination, colourspace_source]
         )
 
     transform_list = [
