@@ -6,7 +6,7 @@ If you don't have to ask, the following will provide insight.
 # **How**
 
 ```
-usage: generate_config.py [-h] [-et EXPONENT_TOE] [-ps EXPONENT_SHOULDER] [-fs FULCRUM_SLOPE] [-fi FULCRUM_INPUT] [-fo FULCRUM_OUTPUT] [-ll LIMIT_LOW] [-lh LIMIT_HIGH] [-pi PRIMARIES_INSET PRIMARIES_INSET PRIMARIES_INSET] [-pr PRIMARIES_ROTATE PRIMARIES_ROTATE PRIMARIES_ROTATE]
+usage: generate_config.py [-h] [-et EXPONENT_TOE] [-ps EXPONENT_SHOULDER] [-fs FULCRUM_SLOPE] [-fi FULCRUM_INPUT] [-fo FULCRUM_OUTPUT] [-ll LIMIT_LOW] [-lh LIMIT_HIGH] [-pi PRIMARIES_INSET PRIMARIES_INSET PRIMARIES_INSET] [-pr PRIMARIES_ROTATE PRIMARIES_ROTATE PRIMARIES_ROTATE] [-to TINTING_OFFSET] [-tr TINTING_ROTATE]
 ```
 All of the following creative options will influence what you end up seeing in terms of hue, value, and chroma.
 
