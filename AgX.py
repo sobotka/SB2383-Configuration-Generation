@@ -12,7 +12,6 @@ __email__ = troy.sobotka@gmail.com
 __status__ = Test
 """
 
-import colour
 import numpy
 import working_space
 import PyOpenColorIO
@@ -27,28 +26,22 @@ def shape_OCIO_matrix(numpy_matrix):
     return ocio_matrix
 
 
-def AgX_compressed_matrix(
+def AgX_create_colourspace(
     primaries_rotate=[1.75, -0.5, -1.0],
     primaries_scale=[0.15, 0.15, 0.10],
-    achromatic_rotate=0.0,
-    achromatic_outset=0.0,
-    adaptation="CAT02",
-    show_plot=False,
+    tinting_rotate=0.0,
+    tinting_outset=0.0,
+    name="No Name Set",
 ):
-    colourspace_BT709 = colour.RGB_COLOURSPACES["ITU-R BT.709"]
-    colourspace_sb2383 = working_space.create_workingspace(
+    colourspace_destination = working_space.create_workingspace(
         primaries_rotate=primaries_rotate,
         primaries_scale=primaries_scale,
-        achromatic_rotate=achromatic_rotate,
-        achromatic_outset=achromatic_outset,
-        show_plot=show_plot,
+        achromatic_rotate=tinting_rotate,
+        achromatic_outset=tinting_outset,
+        name=name,
     )
 
-    return colour.matrix_RGB_to_RGB(
-        colourspace_sb2383,
-        colourspace_BT709,
-        chromatic_adaptation_transform=adaptation,
-    )
+    return colourspace_destination
 
 
 def as_numeric(obj, as_type=numpy.float64):

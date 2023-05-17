@@ -24,7 +24,7 @@ def create_workingspace(
     achromatic_rotate=0.0,
     achromatic_outset=0.0,
     colourspace_in=colour.RGB_COLOURSPACES["ITU-R BT.709"],
-    show_plot=False,
+    name="No name set",
 ):
     #####
     # Construct the Base Image Formation Colourspace
@@ -173,8 +173,8 @@ def create_workingspace(
         ]
     )
 
-    colourspace_sb2383 = colour.RGB_Colourspace(
-        name="SouzaBrejon2383 Inset",
+    colourspace = colour.RGB_Colourspace(
+        name=name,
         primaries=primaries_inset,
         whitepoint=achromatic_outset_coordinates,
         whitepoint_name=colourspace_in.whitepoint_name,
@@ -183,9 +183,5 @@ def create_workingspace(
         use_derived_matrix_RGB_to_XYZ=True,
         use_derived_matrix_XYZ_to_RGB=True,
     )
-    if show_plot is True:
-        colour.plotting.plot_RGB_colourspaces_in_chromaticity_diagram_CIE1931(
-            [colourspace_sb2383, colourspace_in]
-        )
 
-    return colourspace_sb2383
+    return colourspace

@@ -88,8 +88,8 @@ if __name__ == "__main__":
     default_rotate = [4.5, -0.5, -2.0]
     default_inset = [0.15, 0.10, 0.10]
     default_outset = default_inset
-    default_achromatic_rotate = 0.0
-    default_achromatic_outset = 0.0
+    default_tinting_rotate = 0.0
+    default_tinting_outset = 0.0
 
     argparser.add_argument(
         "-et",
@@ -168,27 +168,22 @@ if __name__ == "__main__":
         default=default_rotate,
     )
     argparser.add_argument(
-        "-ao",
-        "--achromatic_outset",
-        help="Percentage of scaling outset for the achromatic coordinate",
+        "-to",
+        "--tinting_outset",
+        help="Percentage of scaling outset for the achromatic coordinate for tinting "
+        "tinting, positive counterclockwise, negative clockwise, where zero "
+        "degrees is toward greenish",
         type=float,
-        default=default_achromatic_outset,
+        default=default_tinting_outset,
     )
     argparser.add_argument(
-        "-ar",
-        "--achromatic_rotate",
-        help="Rotational adjustment in degrees for the achromatic coordinate, "
-        "positive counterclockwise, negative clockwise",
+        "-tr",
+        "--tinting_rotate",
+        help="Rotational adjustment in degrees for the achromatic coordinate for "
+        "tinting, positive counterclockwise, negative clockwise, where zero "
+        "degrees is toward greenish",
         type=float,
-        default=default_achromatic_rotate,
-    )
-    argparser.add_argument(
-        "-aa",
-        "--achromatic_adaptation",
-        help="Whether or not to perform chromatic adaptation in the restore "
-        "direction of the matrix transform",
-        type=bool,
-        default=True,
+        default=default_tinting_rotate,
     )
     argparser.add_argument(
         "-vp",
@@ -199,11 +194,6 @@ if __name__ == "__main__":
     )
 
     args = argparser.parse_args()
-
-    if args.achromatic_adaptation:
-        adaptation = "CAT02"
-    else:
-        adaptation = None
 
     config = PyOpenColorIO.Config()
     description = (
@@ -238,31 +228,49 @@ if __name__ == "__main__":
     )
 
     # AgX
-    working_space = AgX.shape_OCIO_matrix(
-        AgX.AgX_compressed_matrix(
-            primaries_rotate=args.primaries_rotate,
-            primaries_scale=args.primaries_inset,
-            achromatic_rotate=args.achromatic_rotate,
-            achromatic_outset=args.achromatic_outset,
-            adaptation=None,
-            show_plot=args.verbose_plotting,
+    colourspace_source = colour.RGB_COLOURSPACES["ITU-R BT.709"]
+    args.tinting_rotate += 180.0
+
+    colourspace_working = AgX.AgX_create_colourspace(
+        primaries_rotate=args.primaries_rotate,
+        primaries_scale=args.primaries_inset,
+        tinting_rotate=0.0,
+        tinting_outset=0.0,
+        name="Custom AgX Working Space",
+    )
+
+    colourspace_destination = AgX.AgX_create_colourspace(
+        primaries_rotate=args.primaries_rotate,
+        primaries_scale=args.primaries_outset,
+        tinting_rotate=args.tinting_rotate,
+        tinting_outset=args.tinting_outset,
+        name="Custom AgX Destination Space",
+    )
+
+    matrix_working = AgX.shape_OCIO_matrix(
+        colour.matrix_RGB_to_RGB(
+            colourspace_working,
+            colourspace_source,
+            chromatic_adaptation_transform=None,
         )
     )
 
-    output_space = AgX.shape_OCIO_matrix(
-        AgX.AgX_compressed_matrix(
-            primaries_rotate=args.primaries_rotate,
-            primaries_scale=args.primaries_outset,
-            achromatic_rotate=args.achromatic_rotate,
-            achromatic_outset=args.achromatic_outset,
-            adaptation=adaptation,
-            show_plot=args.verbose_plotting,
+    matrix_destination = AgX.shape_OCIO_matrix(
+        colour.matrix_RGB_to_RGB(
+            colourspace_destination,
+            colourspace_working,
+            chromatic_adaptation_transform=None,
         )
     )
+
+    if args.verbose_plotting is True:
+        colour.plotting.plot_RGB_colourspaces_in_chromaticity_diagram_CIE1931(
+            [colourspace_working, colourspace_destination]
+        )
 
     transform_list = [
         PyOpenColorIO.RangeTransform(minInValue=0.0, minOutValue=0.0),
-        PyOpenColorIO.MatrixTransform(working_space),
+        PyOpenColorIO.MatrixTransform(matrix_working),
         PyOpenColorIO.AllocationTransform(
             allocation=PyOpenColorIO.Allocation.ALLOCATION_LG2,
             vars=[
@@ -404,7 +412,7 @@ if __name__ == "__main__":
             direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_FORWARD,
         ),
         PyOpenColorIO.MatrixTransform(
-            output_space,
+            matrix_destination,
             direction=PyOpenColorIO.TransformDirection.TRANSFORM_DIR_INVERSE,
         ),
         PyOpenColorIO.ExponentTransform(
