@@ -1,3 +1,7 @@
+# Cognitive Mumbo Jumbo
+[The deeper questions and thinking can be found here.](https://github.com/sobotka/AgX-S2O3)
+
+
 # **Who**
 If you have to ask, this probably isn't ready for you.
 
